@@ -3,7 +3,7 @@
 > `copier-run` is a simple command line tool, that provides a list of available [copier](https://copier.readthedocs.io/en/stable/) templates from a GitHub user and allows to execute them.
 
 ![Go version](https://img.shields.io/github/go-mod/go-version/brpaz/copier-run?style=for-the-badge)
-[![Latest Release](https://img.shields.io/github/v/release/brpaz/copier-run?style=for-the-badge](https://github.com/brpaz/copier-run/releases/latest)
+[![Latest Release](https://img.shields.io/github/v/release/brpaz/copier-run?style=for-the-badge)](https://github.com/brpaz/copier-run/releases/latest)
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/brpaz/copier-run/CI?style=for-the-badge)](https://github.com/brpaz/copier-run/actions/CI)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
@@ -40,6 +40,15 @@ A list will be shown, with all the repositories with topic `copier-template` in 
 
 You can select the template you want to use and the destination path. After submitting all the prompts, `copier` will be executed with the specified arguments.
 
+### Options
+
+By default this command is configured to use my own github user. You can override it using the `--gh-user` flag.
+
+```sh
+copier-run --gh-user=<some-user>
+```
+
+**TODO** remove this default and make it configurable.
 
 
 ## Contributing
