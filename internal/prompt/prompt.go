@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/brpaz/copier-run/internal/copier"
 	"github.com/pkg/errors"
 )
@@ -84,6 +85,10 @@ func Execute(availableTemplates []copier.TemplateGitRepository) (PromptResult, e
 	)
 
 	if err != nil {
+		if err == terminal.InterruptErr {
+			return PromptResult{}, nil
+		}
+
 		return PromptResult{}, errors.Wrap(err, "Error processing answers")
 	}
 
