@@ -1,0 +1,118 @@
+# This is an example .goreleaser.yml file with some sensible defaults.
+# Make sure to check the documentation at https://goreleaser.com
+project_name: copier-run
+before:
+  hooks:
+    # You may remove this if you don't use go modules.
+    - go mod tidy
+    # you may remove this if you don't need go copier-runerate
+    #- go copier-runerate ./...
+
+# ==================================
+# Build customization
+# ==================================
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X github.com/brpaz/copier-run/internal/version.Version={{.Version}} -X github.com/brpaz/copier-run/internal/version.GitCommit={{.Commit}} -X github.com/brpaz/copier-run/internal/version.BuildDate={{.Date}}
+
+# ==================================
+# Archive customization
+# ==================================
+archives:
+  - format: tar.gz
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    # use zip for windows archives
+    format_overrides:
+      - goos: windows
+        format: zip
+
+# ==================================
+# Package configurations
+# ==================================
+nfpms:
+  # Template to your app's homepage.
+  # Default is empty.
+  - homepage: https://brunopaz.dev
+
+    # Your app's maintainer (probably you).
+    # Default is empty.
+    maintainer: Bruno Paz <oss@brunopaz.dev
+
+    # Template to your app's description.
+    # Default is empty.
+    description: |-
+      Lists all copier copier-runerators from a GitHub user and allow to execute them.
+
+    # Your app's license.
+    # Default is empty.
+    license: MIT
+
+    # Formats to be copier-runerated.
+    formats:
+      - deb
+      - rpm
+      - archlinux # Since GoReleaser v1.13.
+
+#==================================
+# Docker Customization
+#==================================
+dockers:
+  - image_templates: ["ghcr.io/brpaz/{{ .ProjectName }}:{{ .Version }}-amd64"]
+    dockerfile: Dockerfile.release
+    use: buildx
+    build_flag_templates:
+      - --platform=linux/amd64
+      - --label=org.opencontainers.image.title={{ .ProjectName }}
+      - --label=org.opencontainers.image.description={{ .ProjectName }}
+      - --label=org.opencontainers.image.url=https://github.com/brpaz/{{ .ProjectName }}
+      - --label=org.opencontainers.image.source=https://github.com/brpaz/{{ .ProjectName }}
+      - --label=org.opencontainers.image.version={{ .Version }}
+      - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
+      - --label=org.opencontainers.image.revision={{ .FullCommit }}
+      - --label=org.opencontainers.image.licenses=MIT
+  - image_templates: ["ghcr.io/brpaz/{{ .ProjectName }}:{{ .Version }}-arm64v8"]
+    goarch: arm64
+    dockerfile: Dockerfile.release
+    use: buildx
+    build_flag_templates:
+      - --platform=linux/arm64/v8
+      - --label=org.opencontainers.image.title={{ .ProjectName }}
+      - --label=org.opencontainers.image.description={{ .ProjectName }}
+      - --label=org.opencontainers.image.url=https://github.com/brpaz/{{ .ProjectName }}
+      - --label=org.opencontainers.image.source=https://github.com/brpaz/{{ .ProjectName }}
+      - --label=org.opencontainers.image.version={{ .Version }}
+      - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
+      - --label=org.opencontainers.image.revision={{ .FullCommit }}
+      - --label=org.opencontainers.image.licenses=MIT
+docker_manifests:
+  - name_template: ghcr.io/brpaz/{{ .ProjectName }}:{{ .Version }}
+    image_templates:
+      - ghcr.io/brpaz/{{ .ProjectName }}:{{ .Version }}-amd64
+      - ghcr.io/brpaz/{{ .ProjectName }}:{{ .Version }}-arm64v8
+  - name_template: ghcr.io/brpaz/{{ .ProjectName }}:latest
+    image_templates:
+      - ghcr.io/brpaz/{{ .ProjectName }}:{{ .Version }}-amd64
+      - ghcr.io/brpaz/{{ .ProjectName }}:{{ .Version }}-arm64v8
+
+# ==================================
+# Other configurations
+# ==================================
+checksum:
+  name_template: "checksums.txt"
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"

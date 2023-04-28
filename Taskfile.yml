@@ -1,0 +1,75 @@
+# https://taskfile.dev
+
+version: "3"
+
+vars:
+  PROJECT_NAME: "copier-run"
+
+dotenv:
+  - ".env"
+
+tasks:
+  default:
+    cmds:
+      - task -l
+    silent: true
+  setup:
+    desc: Setup the development envrionment
+    cmds:
+      - direnv allow
+      - lefthook install
+
+  build:
+    desc: Build the project
+    cmds:
+      - |
+        go build -ldflags="-s -w \
+          -X github.com/brpaz/copier-runinternal/version.BuildDate=${BUILD_DATE} \
+          -X github.com/brpaz/copier-runinternal/version.Version=${VERSION} \
+          -X github.com/brpaz/copier-runinternal/version.GitCommit=${COMMIT_SHA} \
+        -extldflags '-static'" -a \
+        -o build/app ./main.go
+    silent: true
+    env:
+      BUILD_DATE: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+      VERSION: "dev"
+      COMMIT_SHA: $(git rev-parse HEAD || echo "GitNotFound")
+      CGO_ENABLED: 0
+      GOOS: linux
+      GOARCH: amd64
+
+  build-docker:
+    desc: Build the project using Docker
+    cmds:
+      - docker buildx build -t {{.PROJECT_NAME}}:dev .
+
+  run:
+    desc: Runs the application using go run.
+    cmds:
+      - go run ./main.go {{.CLI_ARGS}}
+
+  install:
+    desc: Install the application
+    cmds:
+      - go install ./...
+  lint:
+    desc: Run golangci-lint
+    cmds:
+      - golangci-lint run
+
+  test:
+    desc: Runs Unit tests
+    cmds:
+      - mkdir -p reports
+      - gotestsum --format testname --junitfile reports/unit-tests.xml -- -coverprofile=reports/cover.out ./...
+
+  test-watch:
+    desc: Runs Unit tests in watch mode
+    cmds:
+      - gotestsum --watch --format testname
+
+  snapshot:
+    desc: Build a snapshot release
+    cmds:
+      - goreleaser check
+      - goreleaser release --snapshot --clean
