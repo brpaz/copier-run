@@ -2,7 +2,7 @@
 # This minimal dockerfile reflects that.
 # https://goreleaser.com/customization/docker/
 # https://blog.devcopier-runius.io/goreleaser-build-multi-arch-docker-images-8dd9a7903675
-FROM alpine:3.18.0
+FROM alpine:3.18.4
 
 COPY copier-run /bin
 
