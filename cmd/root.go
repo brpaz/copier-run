@@ -40,7 +40,7 @@ func NewRootCmd() *cobra.Command {
 				err := copier.RunGenerator(answers.SelectedTemplate.Url, answers.SelectedDestination)
 
 				if err != nil {
-					return errors.Wrap(err, "Error running copier-runerator")
+					return errors.Wrap(err, "Error running copier")
 				}
 			}
 
