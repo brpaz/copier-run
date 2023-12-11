@@ -32,7 +32,7 @@ RUN --mount=target=. \
 # ====================================
 # Production stage
 # ====================================
-FROM alpine:3.18
+FROM alpine:3.19
 
 COPY --from=build /out/copier-run /bin
 
